@@ -1,5 +1,6 @@
 package com.pat_eichler.bnn.world;
 
+import com.pat_eichler.bnn.brain.DNA;
 import com.pat_eichler.bnn.brain.Genetics;
 
 import java.io.*;
@@ -49,7 +50,7 @@ public class Runner {
       return;
     }
     
-    Genetics[] genePool = loadGenePool(worldID);
+    DNA[] genePool = loadGenePool(worldID);
     
     World w = new World(worldID, s, genePool);
     w.run();
@@ -127,14 +128,14 @@ public class Runner {
     Files.copy(Paths.get("config.json"), Paths.get("experiments", String.valueOf(worldID), "config.json"));
   }
   
-  Genetics[] loadGenePool(int worldID) {
+  DNA[] loadGenePool(int worldID) {
     String path = Paths.get("experiments", String.valueOf(worldID), "genePool.ser").toString();
     ObjectInputStream oi = null;
     
     try {
       FileInputStream fi = new FileInputStream(new File(path));
       oi = new ObjectInputStream(fi);
-      return (Genetics[]) oi.readObject();
+      return (DNA[]) oi.readObject();
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
     }finally {

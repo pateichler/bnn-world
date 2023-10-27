@@ -2,6 +2,7 @@ package com.pat_eichler.bnn.world;
 
 import com.pat_eichler.bnn.brain.Brain;
 import com.pat_eichler.bnn.brain.BrainSettings;
+import com.pat_eichler.bnn.brain.DNA;
 import com.pat_eichler.bnn.brain.Genetics;
 import com.pat_eichler.bnn.brain.runner.RunnerLoader;
 
@@ -26,9 +27,9 @@ import java.util.stream.Stream;
 public class World {
   private Brain[] brains;
   private double[] brainFitness;
-  private int id;
+  private final int id;
   
-  private Random rand;
+  private final Random rand;
   private final Settings settings;
   
   public World(int worldID, Settings settings) {
@@ -42,7 +43,7 @@ public class World {
     createPath();
   }
   
-  public World(int worldID, Settings settings, Genetics[] genePool) {
+  public World(int worldID, Settings settings, DNA[] genePool) {
     this(worldID, settings);
 
     try(BrainSettings o = settings.brainSettings.setContext()) {
@@ -95,7 +96,7 @@ public class World {
       if(fit1 + fit2 > 0)
         parent1Ratio = Math.min(settings.worldSettings.MAX_PARENT_RATIO, Math.max(1 - settings.worldSettings.MAX_PARENT_RATIO, fit1 / (fit1 + fit2)));
 
-      Genetics dna = brains[mates[0]].dna.crossGenetics(brains[mates[1]].dna, parent1Ratio);
+      DNA dna = DNA.crossDNA(brains[mates[0]].genetics.dna, brains[mates[1]].genetics.dna, parent1Ratio);
       newBrains[i] = new Brain(dna);
     }
     
@@ -151,9 +152,9 @@ public class World {
   }
   
   void saveBrains() {
-    Genetics[] genePool = new Genetics[brains.length];
+    DNA[] genePool = new DNA[brains.length];
     for(int i = 0; i < genePool.length; i++)
-      genePool[i] = brains[i].dna;
+      genePool[i] = brains[i].genetics.dna;
     
     int bestIndex = 0;
     for(int i = 1; i < brainFitness.length; i++)
@@ -199,11 +200,11 @@ public class World {
     meanFit /= brainFitness.length;
     
     // Possibly pass in gene pool
-    Genetics[] genePool = new Genetics[brains.length];
+    DNA[] genePool = new DNA[brains.length];
     for(int i = 0; i < genePool.length; i++)
-      genePool[i] = brains[i].dna;
+      genePool[i] = brains[i].genetics.dna;
     
-    double variation = genePool[0].calculateGenePoolVariation(genePool);
+    double variation = DNA.calculateGenePoolVariation(genePool);
     
     int g = getLastGen() + 1;
     
