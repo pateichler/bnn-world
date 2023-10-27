@@ -3,15 +3,11 @@ package com.pat_eichler.bnn.world;
 import com.pat_eichler.bnn.brain.Brain;
 import com.pat_eichler.bnn.brain.BrainSettings;
 import com.pat_eichler.bnn.brain.Genetics;
-import com.pat_eichler.bnn.brain.NNGenetics;
-import com.pat_eichler.bnn.brain.runner.BrainRunner;
 import com.pat_eichler.bnn.brain.runner.RunnerLoader;
-import com.pat_eichler.bnn.brain.runner.SimpleRunner;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -98,8 +94,8 @@ public class World {
       double parent1Ratio = 0.5;
       if(fit1 + fit2 > 0)
         parent1Ratio = Math.min(settings.worldSettings.MAX_PARENT_RATIO, Math.max(1 - settings.worldSettings.MAX_PARENT_RATIO, fit1 / (fit1 + fit2)));
-      
-      Genetics dna = new NNGenetics((NNGenetics)brains[mates[0]].dna, (NNGenetics)brains[mates[1]].dna, parent1Ratio);
+
+      Genetics dna = brains[mates[0]].dna.crossGenetics(brains[mates[1]].dna, parent1Ratio);
       newBrains[i] = new Brain(dna);
     }
     
@@ -207,7 +203,7 @@ public class World {
     for(int i = 0; i < genePool.length; i++)
       genePool[i] = brains[i].dna;
     
-    double variation = calculateGenePoolVariation(genePool, true);
+    double variation = genePool[0].calculateGenePoolVariation(genePool);
     
     int g = getLastGen() + 1;
     
@@ -251,32 +247,7 @@ public class World {
       e.printStackTrace();
     }
   }
-  
-  
-  public static double calculateGenePoolVariation(Genetics[] genePool, boolean strength) {
-    // TODO: Somehow get this method to work with general genetics
-    
-    int l = strength ? ((NNGenetics)genePool[0]).strengthNet.getWeightsLength() : ((NNGenetics)genePool[0]).typeNet.getWeightsLength();
-    double totStd = 0;
-    
-    double[] weights = new double[genePool.length];
-    for(int i = 0; i < l; i++) {
-      for(int g = 0; g < genePool.length; g++) 
-        weights[g] = strength ? ((NNGenetics)genePool[g]).strengthNet.getWeights(i) : ((NNGenetics)genePool[g]).typeNet.getWeights(i); 
-    
-      double mean = 0;
-      for(double n : weights)
-        mean += n;
-      mean /= genePool.length;
-      
-      double std = 0;
-      for(double n : weights)
-        std += Math.pow((n - mean), 2);
-      totStd += Math.sqrt(std / genePool.length);
-    }
-    
-    return totStd / l;
-  }
+
   
   public Path getFilePath(String fileName) {
     return Paths.get("experiments", String.valueOf(id), fileName);
