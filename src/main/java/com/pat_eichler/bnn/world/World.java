@@ -96,7 +96,7 @@ public class World {
       if(fit1 + fit2 > 0)
         parent1Ratio = Math.min(settings.worldSettings.MAX_PARENT_RATIO, Math.max(1 - settings.worldSettings.MAX_PARENT_RATIO, fit1 / (fit1 + fit2)));
 
-      DNA dna = DNA.crossDNA(brains[mates[0]].genetics.dna, brains[mates[1]].genetics.dna, parent1Ratio);
+      DNA dna = DNAHelper.crossDNA(brains[mates[0]].genetics.dna, brains[mates[1]].genetics.dna, parent1Ratio, rand, settings.worldSettings);
       newBrains[i] = new Brain(dna);
     }
     
@@ -204,7 +204,7 @@ public class World {
     for(int i = 0; i < genePool.length; i++)
       genePool[i] = brains[i].genetics.dna;
     
-    double variation = DNA.calculateGenePoolVariation(genePool);
+    double variation = DNAHelper.calculateGenePoolVariation(genePool);
     
     int g = getLastGen() + 1;
     
