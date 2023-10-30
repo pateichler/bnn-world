@@ -56,37 +56,6 @@ public class Runner {
     w.run();
   }
   
-//  public void visualizeBestBrain(int worldID) {
-//    Settings s = getSettingsFromWorld(worldID);
-//
-//    Genetics g = loadBestBrain(worldID);
-//
-//    visualizeBrain(g);
-//  }
-  
-//  void visualizeBrain(Genetics g) {
-//    Brain b = new Brain(g);
-//    b.printConnectionStrengths();
-//    System.out.println("===============");
-//    b.printConnectionTypes();
-//
-//    SimpleRunner sr = new SimpleRunner(b);
-//    double fit = sr.call();
-//    System.out.println("Trained with fitness: " + fit);
-//
-//    SimpleRunnerVisualizer v = new SimpleRunnerVisualizer(b);
-//    System.out.println("com.pat_eichler.Brain in last state:");
-//    v.br.visualize();
-//
-//    System.out.println("====================");
-//    b.printConnectionStrengths();
-//    System.out.println("===============");
-//    b.printConnectionTypes();
-//
-////    b.clearTransmitters();
-//    v.run();
-//  }
-  
   Settings getDefaultSettings() {
     // TODO: Don't use paths
     File f = new File(Paths.get("config.json").toString());
@@ -106,21 +75,6 @@ public class Runner {
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
-//    Reader reader = null;
-//    try {
-//      reader = Files.newBufferedReader(path);
-//
-//      Gson gson = new Gson();
-//      return gson.fromJson(reader, Settings.class);
-//    } catch (IOException e) { }
-//    finally {
-//        try {
-//          if(reader != null)
-//            reader.close();
-//        } catch (IOException e) {
-//          e.printStackTrace();
-//        }
-//    }
   }
   
   void copySettingsToWorld(int worldID) throws IOException {
@@ -195,54 +149,4 @@ public class Runner {
     
     return maxID;
   }
-  
-//  static void printVariationFromWorld(int worldID) {
-//    Runner r = new Runner();
-//    Settings s = r.getSettingsFromWorld(worldID);
-//    Genetics[] genePool = r.loadGenePool(5);
-//    System.out.println("Strength std: " + World.calculateGenePoolVariation(genePool, true));
-//    System.out.println("Type std: " + World.calculateGenePoolVariation(genePool, false));
-//
-//    Genetics[] genePoolRandom = new Genetics[genePool.length];
-//    for(int i = 0; i < genePool.length; i++)
-//      genePoolRandom[i] = new NNGenetics();
-//
-//    System.out.println("===============");
-//    System.out.println("Strength random std: " + World.calculateGenePoolVariation(genePoolRandom, true));
-//    System.out.println("Type random std: " + World.calculateGenePoolVariation(genePoolRandom, false));
-//  }
-  
-//  static void testBrain() {
-//    Brain b = new Brain(new NNGenetics());
-//    System.out.println(b);
-//
-//    try {
-//      Brain b2 = new Brain(new NNGenetics((NNGenetics)b.dna, (NNGenetics)b.dna));
-//      System.out.println(b2);
-//    } catch (Exception e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
-//  }
-  
-//  static void testNeuralNet() {
-//    int inputNodes = Settings.Instance.totalNTCount() * 2;
-//
-//    int[] strengthLayers = new int[Settings.Instance.STRENGTH_NET_IN_LAYERS.length + 2];
-//    strengthLayers[0] = inputNodes;
-//    strengthLayers[strengthLayers.length - 1] = 3;
-//
-//    NeuralNetwork strengthNet = new NeuralNetwork(strengthLayers);
-//
-//    System.out.println(strengthNet.predict(new double[] {0,0,0,0,0})-1);
-//
-//    try {
-//      NeuralNetwork newNet = new NeuralNetwork(strengthNet, strengthNet, 0.5);
-//      System.out.println(newNet.predict(new double[] {0,0,0,0,0})-1);
-//    } catch (Exception e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
-//  }
-
 }
