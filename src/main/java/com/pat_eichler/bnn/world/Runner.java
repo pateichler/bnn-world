@@ -71,7 +71,7 @@ public class Runner {
   
   Settings getSettingsFromFile(File file) {
     try {
-      return new Settings(file);
+      return Settings.getSettings(file);
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }

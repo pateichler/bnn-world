@@ -6,6 +6,7 @@ import java.util.Random;
 
 public class DNAHelper {
     public static DNA crossDNA(DNA dna1, DNA dna2, double fitRatio, Random rand, WorldSettings settings){
+        //TODO: Test method
         if(dna1.data.length != dna2.data.length)
             throw new RuntimeException("DNA not same length! Can't cross DNA");
 

@@ -55,6 +55,7 @@ public class World {
   
   public void run() {
     System.out.println("Running world: " + id);
+    System.out.println(settings.worldSettings.POP_SIZE);
 
     try(BrainSettings o = settings.brainSettings.setContext()) {
       for (int i = 0; i < settings.worldSettings.NUM_GENS; i++) {
