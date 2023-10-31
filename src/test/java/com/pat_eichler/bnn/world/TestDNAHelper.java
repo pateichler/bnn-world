@@ -10,11 +10,11 @@ public class TestDNAHelper {
     @Test
     void testCrossDNANone(){
         Random r = new Random(){ @Override public float nextFloat() {return  1;} };
-        DNA dna1 = new DNA(new byte[]{(byte) 0x00, (byte) 0x00});
-        DNA dna2 = new DNA(new byte[]{(byte) 0xFF, (byte) 0xFF});
+        byte[] expectedData = new byte[]{(byte) 0x0F, (byte) 0xF0, (byte) 0xA4};
+        DNA dna1 = new DNA(expectedData);
+        DNA dna2 = new DNA(new byte[]{(byte) 0xF0, (byte) 0xF0, (byte) 0x59});
 
         DNA newDNA = DNAHelper.crossDNA(dna1, dna2, 0, r, 0.5d, 0.5d);
-        byte[] expectedData = new byte[]{(byte) 0x00, (byte) 0x00};
         Assertions.assertArrayEquals(expectedData, newDNA.data);
     }
 
@@ -58,7 +58,10 @@ public class TestDNAHelper {
     void testCalculateGenePoolVariationNone(){
         //TODO: Complete
         byte[][] poolData = new byte[][]{
-                {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}
+                {0,1,1,0},
+                {0,1,1,0},
+                {0,1,1,0},
+                {0,1,1,0}
         };
         DNA[] genePool = new DNA[poolData.length];
         for (int i = 0; i < genePool.length; i++)
@@ -80,6 +83,7 @@ public class TestDNAHelper {
         for (int i = 0; i < genePool.length; i++)
             genePool[i] = new DNA(poolData[i]);
 
-        Assertions.assertEquals((0.25*0.25*3 + 0.75*0.75 + 0.5*0.5*2 + 0.5*0.5*2)/8, DNAHelper.calculateGenePoolVariation(genePool));
+        //(0.25*0.25*3 + 0.75*0.75 + 0.5*0.5*2 + 0.5*0.5*2)/(8*4)
+        Assertions.assertEquals((1 + 1 - 0.25*0.25*4)/8, DNAHelper.calculateGenePoolVariation(genePool));
     }
 }
