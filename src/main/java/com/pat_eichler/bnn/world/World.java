@@ -3,7 +3,6 @@ package com.pat_eichler.bnn.world;
 import com.pat_eichler.bnn.brain.Brain;
 import com.pat_eichler.bnn.brain.BrainSettings;
 import com.pat_eichler.bnn.brain.DNA;
-import com.pat_eichler.bnn.brain.Genetics;
 import com.pat_eichler.bnn.brain.runner.RunnerLoader;
 
 import java.io.FileOutputStream;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 
 public class World {
   private Brain[] brains;
-  private double[] brainFitness;
+  private final double[] brainFitness;
   private final int id;
   
   private final Random rand;
@@ -67,8 +66,7 @@ public class World {
           System.out.println("Generation completed in: " + (double) t / 1000 + "s");
         } catch (Exception e) {
           System.out.println("Error in generation: " + (i));
-          e.printStackTrace();
-          break;
+          throw new RuntimeException(e);
         }
 
         saveBrains();
@@ -77,7 +75,7 @@ public class World {
     }
   }
   
-  void createBrains() throws Exception {
+  void createBrains() {
     // Check if we don't have previous brains ... if so create new brains from scratch
     if(brains == null) {
       brains = new Brain[settings.worldSettings.POP_SIZE];
@@ -106,25 +104,26 @@ public class World {
   
   void runGeneration() throws InterruptedException {
     //TODO: Run this as a threaded pool
-    ExecutorService executor = Executors.newFixedThreadPool(settings.worldSettings.THREAD_COUNT);
-    
-    List<Callable<Double>> callableTasks = new ArrayList<>();
-    for(Brain b : brains)
-      callableTasks.add(RunnerLoader.getBrainRunnerFromClassString(settings.worldSettings.BRAIN_RUNNER, b));
+    try(ExecutorService executor = Executors.newFixedThreadPool(settings.worldSettings.THREAD_COUNT)) {
 
-    List<Future<Double>> futures = executor.invokeAll(callableTasks);
-    executor.shutdown();
-    
-    int i = 0;
-    for(Future<Double> f : futures) {
-       try {
-        brainFitness[i] = f.get();
-      } catch (ExecutionException e) {
-        e.printStackTrace();
+      List<Callable<Double>> callableTasks = new ArrayList<>();
+      for (Brain b : brains)
+        callableTasks.add(RunnerLoader.getBrainRunnerFromClassString(settings.worldSettings.BRAIN_RUNNER, b));
+
+      List<Future<Double>> futures = executor.invokeAll(callableTasks);
+      executor.shutdown();
+
+
+      int i = 0;
+      for (Future<Double> f : futures) {
+        try {
+          brainFitness[i] = f.get();
+        } catch (ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+        i++;
       }
-       i++;
     }
-    
     
 //    com.pat_eichler.BrainRunner br = com.pat_eichler.settings.worldSettings.getRunner();
 //    for(int i = 0; i < brains.length; i ++)
@@ -161,26 +160,18 @@ public class World {
     for(int i = 1; i < brainFitness.length; i++)
       if(brainFitness[i] > brainFitness[bestIndex])
         bestIndex = i;
-    
+
     saveSerObject(genePool, "genePool.ser");
     saveSerObject(genePool[bestIndex], "bestGenes.ser");
   }
   
   void saveSerObject(Object obj, String fileName) {
-    ObjectOutputStream oos = null;
     try {
-      FileOutputStream fout = new FileOutputStream(getFilePath(fileName).toString());
-      oos = new ObjectOutputStream(fout);
-      oos.writeObject(obj);
+      try(FileOutputStream fileOut = new FileOutputStream(getFilePath(fileName).toString()); ObjectOutputStream oos = new ObjectOutputStream(fileOut)){
+          oos.writeObject(obj);
+      }
     } catch (IOException e) {
-      e.printStackTrace();
-    }finally{
-      if(oos != null)
-        try {
-          oos.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+      throw new RuntimeException(e);
     }
   }
   
@@ -219,19 +210,19 @@ public class World {
     try {
       Files.write(getFilePath("genStats.csv"), csvString.getBytes(), StandardOpenOption.APPEND);
     }catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     
     saveFitnessRaw();
   }
   
   int getLastGen() {
-    int lineCount = 0;
+    int lineCount;
     
     try (Stream<String> stream = Files.lines(getFilePath("genStats.csv"))) {
       lineCount = (int)stream.count();
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     
     return lineCount - 1; 
@@ -246,7 +237,7 @@ public class World {
     try {
       Files.write(getFilePath("lastGenFit.csv"), csvString.getBytes());
     }catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
@@ -258,28 +249,28 @@ public class World {
   void createPath() {
     // Create folder if doesn't exist
     Path folderPath = getFilePath(".");
-    if(Files.exists(folderPath) == false) {
+    if(!Files.exists(folderPath)) {
       try {
         Files.createDirectories(folderPath);
       } catch (IOException e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     }
     
     // Create CSV if doesn't exist
     Path csvPath = getFilePath("genStats.csv");
-    if(Files.exists(csvPath) == false) {
+    if(!Files.exists(csvPath)) {
       String csvString = String.join(",", "Generation", "Best", "Worst", "Average", "Gene variation") + "\n";
       try {
         Files.write(csvPath, csvString.getBytes(), StandardOpenOption.CREATE);
       } catch (IOException e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     }
   }
   
   LinkedList<Integer> getSubset(int size, int total) {
-    LinkedList<Integer> sel = new LinkedList<Integer>();
+    LinkedList<Integer> sel = new LinkedList<>();
     
     for(int k = 0; k < size; k++) {
       int i = rand.nextInt(total - k);

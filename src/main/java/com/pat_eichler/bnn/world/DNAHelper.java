@@ -46,6 +46,7 @@ public class DNAHelper {
             }
         }
 
+        //TODO: Remove error since unnesesary
         float[] error = new float[genePool[0].data.length * 8];
         for(DNA dna : genePool){
             for(int i = 0; i < dna.data.length; i++){
@@ -60,6 +61,6 @@ public class DNAHelper {
         for (float e : error)
             total += e;
 
-        return total/error.length;
+        return total/(error.length * genePool.length);
     }
 }
