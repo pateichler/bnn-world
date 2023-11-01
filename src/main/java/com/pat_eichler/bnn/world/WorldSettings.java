@@ -13,6 +13,8 @@ public class WorldSettings {
     public Integer POP_SIZE;
     @ConfigProperty(defualtValue = "500", comment = "Number of generations to run.")
     public Integer NUM_GENS;
+    @ConfigProperty(defualtValue = "1", comment = "Number of brain tests to run per generation.")
+    public Integer NUM_TESTS;
     @ConfigProperty(defualtValue = "8", comment = "Tournament size of selecting mates.")
     public Integer TOURN_SIZE;
     @ConfigProperty(defualtValue = "0.0025", comment = "Probability of a single bit mutating.")

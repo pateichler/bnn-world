@@ -100,31 +100,39 @@ public class World {
   }
   
   void runGeneration() throws InterruptedException {
-    //TODO: Run this as a threaded pool
-    try(ExecutorService executor = Executors.newFixedThreadPool(settings.worldSettings.THREAD_COUNT)) {
+    Arrays.fill(brainFitness, 0);
 
-      List<Callable<Double>> callableTasks = new ArrayList<>();
-      for (Brain b : brains)
-        callableTasks.add(RunnerLoader.getBrainRunnerFromClassString(settings.worldSettings.BRAIN_RUNNER, b));
+    for (int t = 0; t < settings.worldSettings.NUM_TESTS; t++) {
+      //TODO: Run this as a threaded pool
+      try (ExecutorService executor = Executors.newFixedThreadPool(settings.worldSettings.THREAD_COUNT)) {
 
-      List<Future<Double>> futures = executor.invokeAll(callableTasks);
-      executor.shutdown();
+        List<Callable<Double>> callableTasks = new ArrayList<>();
+        for (Brain b : brains)
+          callableTasks.add(RunnerLoader.getBrainRunnerFromClassString(settings.worldSettings.BRAIN_RUNNER, b));
+
+        List<Future<Double>> futures = executor.invokeAll(callableTasks);
+        executor.shutdown();
 
 
-      int i = 0;
-      for (Future<Double> f : futures) {
-        try {
-          brainFitness[i] = f.get();
-        } catch (ExecutionException e) {
-          throw new RuntimeException(e);
+        int i = 0;
+        for (Future<Double> f : futures) {
+          try {
+            brainFitness[i] += f.get();
+          } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+          }
+          i++;
         }
-        i++;
+      }
+
+      if(t < settings.worldSettings.NUM_TESTS-1) {
+        for (int i = 0; i < brains.length; i++)
+          brains[i] = new Brain(brains[i].genetics.dna);
       }
     }
-    
-//    com.pat_eichler.BrainRunner br = com.pat_eichler.settings.worldSettings.getRunner();
-//    for(int i = 0; i < brains.length; i ++)
-//      brainFitness[i] = br.runBrain(brains[i]);
+    for (int i = 0; i < brainFitness.length; i++)
+      brainFitness[i] = brainFitness[i] / settings.worldSettings.NUM_TESTS;
+
   }
   
   int[] getMates() {
