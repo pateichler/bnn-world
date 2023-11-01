@@ -19,6 +19,35 @@ public class DNAHelper {
 
         byte[] data = new byte[dna1.data.length];
         boolean use1 = true;
+        int curSegment = 0;
+
+        for(int i = 0; i < dna1.data.length; i++){
+            int b1 = dna1.data[i], b2 = dna2.data[i], bNew = 0;
+            for (int b = 0; b < 8; b++){
+                //, b1>>=1, b2>>=1
+                bNew = bNew<<1;
+                if(curSegment < dna1.segments.length && dna1.segments[curSegment] == i*8+b) {
+                    curSegment++;
+                    if(rand.nextFloat() < crossoverRate)
+                        use1 = !use1;
+                }
+
+                int bit = ((use1 ? b1 : b2) >> (7-b)) & 1;
+                bNew += rand.nextFloat() < mutationRate ? bit ^ 1 : bit;
+            }
+            data[i] = (byte) (bNew);
+        }
+
+        return new DNA(data, dna1.segments);
+    }
+
+    public static DNA crossDNANoSegments(DNA dna1, DNA dna2, double fitRatio, Random rand, double mutationRate, double crossoverRate){
+        //Method could probably be optimized
+        if(dna1.data.length != dna2.data.length)
+            throw new RuntimeException("DNA not same length! Can't cross DNA");
+
+        byte[] data = new byte[dna1.data.length];
+        boolean use1 = true;
 
         for(int i = 0; i < dna1.data.length; i++){
             int b1 = dna1.data[i], b2 = dna2.data[i], bNew = 0;
@@ -34,7 +63,7 @@ public class DNAHelper {
             data[i] = (byte) (bNew);
         }
 
-        return new DNA(data);
+        return new DNA(data, dna1.segments);
     }
 
     public static double calculateGenePoolVariation(DNA[] genePool){
