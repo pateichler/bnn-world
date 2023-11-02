@@ -1,0 +1,38 @@
+{
+  "worldSettings": {
+    "THREAD_COUNT": 4,
+    "POP_SIZE": 3000,
+    "NUM_GENS": 500,
+    "NUM_TESTS": 1,
+    "TOURN_SIZE": 16,
+    "MUTATION_RATE": 0.0025,
+    "CROSSOVER_RATE": 0.05,
+    "MAX_PARENT_RATIO": 0.0,
+    "BRAIN_RUNNER": "TestRunner"
+  },
+  "brainSettings": {
+    "neuronSettings": {
+      "NUM_STATES": 4,
+      "TRIGGER_COOL_DOWN": 1,
+      "MAX_CONNECTIONS": 20,
+      "MAX_BACK_REF_NEURONS": 3,
+      "STATE_UPDATE_PERIOD": 5,
+      "CONN_SEARCH_PERIOD": 4,
+      "CONN_SEARCH_SIZE": 5
+    },
+    "connectionSettings": {
+      "NT_THRESHOLD": 9,
+      "NT_TYPE_NEURON_CHANGE": [-1,0,1],
+      "START_CONNECTION_STRENGTH": 8,
+      "MAX_STRENGTH": 2048,
+      "STRENGTH_INCREASE": 32
+    },
+    "geneticSettings": {
+      "NN_WEIGHT_BITS": 4,
+      "NN_BIASES_BITS": 8,
+      "PRE_STATE_NN_INNER_LAYER": 3,
+      "POST_STATE_NN_INNER_LAYER": 2
+    },
+    "NEURON_COUNT": 8
+  }
+}
