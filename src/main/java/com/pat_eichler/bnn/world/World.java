@@ -3,6 +3,8 @@ package com.pat_eichler.bnn.world;
 import com.pat_eichler.bnn.brain.Brain;
 import com.pat_eichler.bnn.brain.BrainSettings;
 import com.pat_eichler.bnn.brain.DNA;
+import com.pat_eichler.bnn.brain.Genetics;
+import com.pat_eichler.bnn.brain.runner.BrainRunner;
 import com.pat_eichler.bnn.brain.runner.RunnerLoader;
 
 import java.io.FileOutputStream;
@@ -57,6 +59,8 @@ public class World {
       for (int i = 0; i < settings.worldSettings.NUM_GENS; i++) {
         try {
           createBrains();
+          if(i == 0)
+            System.out.println("DNA size: " + brains[0].genetics.dna.data.length * 8 + " bits");
           long t = System.currentTimeMillis();
           runGeneration();
           t = System.currentTimeMillis() - t;
@@ -179,14 +183,29 @@ public class World {
       throw new RuntimeException(e);
     }
   }
-  
+
+  double testSingleBrain(DNA dna, int numTests){
+    double total = 0;
+    for (int i = 0; i < numTests; i++) {
+      Brain testBrain = new Brain(dna);
+      BrainRunner r = RunnerLoader.getBrainRunnerFromClassString(settings.worldSettings.BRAIN_RUNNER, testBrain);
+      total += r.call();
+    }
+
+    return total / numTests;
+  }
+
   void printSaveGenerationStats() {
+    int bestFitIndex = 0;
     double bestFit = 0;
     double worseFit = Double.POSITIVE_INFINITY;
     double meanFit = 0;
-    for(double f : brainFitness) {
-      if(f > bestFit)
+    for(int i = 0; i < brainFitness.length; i++) {
+      double f = brainFitness[i];
+      if(f > bestFit) {
         bestFit = f;
+        bestFitIndex = i;
+      }
       
       if(f < worseFit)
         worseFit = f;
@@ -195,6 +214,8 @@ public class World {
     }
     
     meanFit /= brainFitness.length;
+
+    double retestedBestFit = testSingleBrain(brains[bestFitIndex].genetics.dna, 25);
     
     // Possibly pass in gene pool
     DNA[] genePool = new DNA[brains.length];
@@ -205,7 +226,7 @@ public class World {
     
     int g = getLastGen() + 1;
     
-    String stats = String.join(",", String.valueOf(g), String.valueOf(bestFit), 
+    String stats = String.join(",", String.valueOf(g), String.valueOf(retestedBestFit), String.valueOf(bestFit),
         String.valueOf(worseFit), String.valueOf(meanFit), String.valueOf(variation));
     
     System.out.println("Gen: (" + stats + ")");
@@ -241,6 +262,22 @@ public class World {
     
     try {
       Files.write(getFilePath("lastGenFit.csv"), csvString.getBytes());
+    }catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  void saveFitHist(){
+    int[] bins = new int[50];
+    for (double f : brainFitness)
+      bins[Math.min((int)(bins.length * f), bins.length-1)] ++;
+
+    StringBuilder histString = new StringBuilder();
+    for (int b : bins)
+      histString.append(b).append(",");
+
+    try {
+      Files.write(getFilePath("lastHistFit.csv"), histString.toString().getBytes());
     }catch (IOException e) {
       throw new RuntimeException(e);
     }
