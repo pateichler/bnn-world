@@ -53,14 +53,14 @@ public class World {
   
   public void run() {
     System.out.println("Running world: " + id);
-    System.out.println(settings.worldSettings.POP_SIZE);
+    System.out.println("Population size: " + settings.worldSettings.POP_SIZE);
 
     try(BrainSettings o = settings.brainSettings.setContext()) {
       for (int i = 0; i < settings.worldSettings.NUM_GENS; i++) {
         try {
           createBrains();
           if(i == 0)
-            System.out.println("DNA size: " + brains[0].genetics.dna.data.length * 8 + " bits");
+            System.out.println("DNA size: " + brains[0].genetics.dna.data.length * 8 + " bits, " + brains[0].genetics.dna.segments.length + " segments");
           long t = System.currentTimeMillis();
           runGeneration();
           t = System.currentTimeMillis() - t;
@@ -226,10 +226,19 @@ public class World {
     
     int g = getLastGen() + 1;
     
-    String stats = String.join(",", String.valueOf(g), String.valueOf(retestedBestFit), String.valueOf(bestFit),
-        String.valueOf(worseFit), String.valueOf(meanFit), String.valueOf(variation));
-    
-    System.out.println("Gen: (" + stats + ")");
+//    String stats = String.join(",", String.valueOf(g), String.valueOf(retestedBestFit), String.valueOf(bestFit),
+//        String.valueOf(worseFit), String.valueOf(meanFit), String.valueOf(variation));
+
+    StringBuilder stats = new StringBuilder("Gen: " + g + " |");
+    double[] floatStats = new double[]{retestedBestFit, bestFit, worseFit, meanFit, variation};
+    for (int i = 0; i < floatStats.length; i++) {
+      if(i != 0)
+        stats.append("\t");
+      stats.append(String.format("\t%6.5f", floatStats[i]));
+    }
+
+    stats.append("|");
+    System.out.println(stats);
     
     String csvString = stats + "\n";
     
